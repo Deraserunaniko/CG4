@@ -10,6 +10,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// エンジンの初期化
 	Initialize(L"LE3D_18_デラセルナ_ニコ");
 
+
 	GameScene* gameScene = new GameScene();
 	gameScene->Initialize();
 
