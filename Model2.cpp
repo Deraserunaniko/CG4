@@ -138,37 +138,80 @@ Model2* Model2::CreateSquare() {
 	std::vector<Mesh::VertexPosNormalUv> vertices;
 	std::vector<uint32_t> indices;
 
+	// 四角形の数
+	const uint32_t kSquareCount = 5;
+
 	// 頂点数
-	const uint32_t kNumVertices = 4;
+	// const uint32_t kNumVertices = 4;
+	const uint32_t kNumVertices = kSquareCount * 4;
 	// インデックス数
-	const uint32_t kNumIndices = 6;
+	// const uint32_t kNumIndices = 6;
+	const uint32_t kNumIndices = kSquareCount * 6;
 
 	vertices.resize(kNumVertices);
 	indices.resize(kNumIndices);
 
-	// 左下
-	vertices[0].pos = {-1.0f, -1.0f, 0.0f};
-	vertices[0].uv = {0.0f, 1.0f};
-	vertices[0].normal = {0.0f, 0.0f, -1.0f};
-	// 左上
-	vertices[1].pos = {-1.0f, 1.0f, 0.0f};
-	vertices[1].uv = {0.0f, 0.0f};
-	vertices[1].normal = {0.0f, 0.0f, -1.0f};
-	// 右下
-	vertices[2].pos = {1.0f, -1.0f, 0.0f};
-	vertices[2].uv = {1.0f, 1.0f};
-	vertices[2].normal = {0.0f, 0.0f, -1.0f};
-	// 右上
-	vertices[3].pos = {1.0f, 1.0f, 0.0f};
-	vertices[3].uv = {1.0f, 0.0f};
-	vertices[3].normal = {0.0f, 0.0f, -1.0f};
+	// 四角形を複数生成
+	for (uint32_t i = 0; i < kSquareCount; i++) {
 
-	indices[0] = 0;
-	indices[1] = 1;
-	indices[2] = 2;
-	indices[3] = 1;
-	indices[4] = 3;
-	indices[5] = 2;
+		// 頂点開始番号
+		uint32_t vertexStart = i * 4;
+
+		// インデックス開始番号
+		uint32_t indexStart = i * 6;
+
+		// 座標
+		float offsetX = i * 2.0f - 2.0f;
+
+		// 左下
+		vertices[vertexStart + 0].pos = {-1.0f + offsetX, -1.0f, 0.0f};
+		vertices[vertexStart + 0].uv = {0.0f, 1.0f};
+		vertices[vertexStart + 0].normal = {0.0f, 0.0f, -1.0f};
+
+		// 左上
+		vertices[vertexStart + 1].pos = {-1.0f + offsetX, 1.0f, 0.0f};
+		vertices[vertexStart + 1].uv = {0.0f, 0.0f};
+		vertices[vertexStart + 1].normal = {0.0f, 0.0f, -1.0f};
+
+		// 右下
+		vertices[vertexStart + 2].pos = {1.0f + offsetX, -1.0f, 0.0f};
+		vertices[vertexStart + 2].uv = {1.0f, 1.0f};
+		vertices[vertexStart + 2].normal = {0.0f, 0.0f, -1.0f};
+
+		// 右上
+		vertices[vertexStart + 3].pos = {1.0f + offsetX, 1.0f, 0.0f};
+		vertices[vertexStart + 3].uv = {1.0f, 0.0f};
+		vertices[vertexStart + 3].normal = {0.0f, 0.0f, -1.0f};
+
+		// インデックス
+		indices[indexStart + 0] = vertexStart + 0;
+		indices[indexStart + 1] = vertexStart + 1;
+		indices[indexStart + 2] = vertexStart + 2;
+
+		indices[indexStart + 3] = vertexStart + 1;
+		indices[indexStart + 4] = vertexStart + 3;
+		indices[indexStart + 5] = vertexStart + 2;
+	}
+
+	////左下
+	// vertices[0].pos = {-1.0f, -1.0f, 0.0f};
+	// vertices[0].uv = {0.0f, 1.0f};
+	// vertices[0].normal = {0.0f, 0.0f, -1.0f};
+	////左上
+	// vertices[1].pos = {-1.0f, 1.0f, 0.0f};
+	// vertices[1].uv = {0.0f, 0.0f};
+	// vertices[1].normal = {0.0f, 0.0f, -1.0f};
+	//// 右下
+	// vertices[2].pos = {1.0f, -1.0f, 0.0f};
+	// vertices[2].uv = {1.0f, 1.0f};
+	// vertices[2].normal = {0.0f, 0.0f, -1.0f};
+	//// 右上
+	// vertices[3].pos = {1.0f, 1.0f, 0.0f};
+	// vertices[3].uv = {1.0f, 0.0f};
+	// vertices[3].normal = {0.0f, 0.0f, -1.0f};
+
+	// indices[0] = 0; indices[1] = 1; indices[2] = 2;
+	// indices[3] = 1; indices[4] = 3; indices[5] = 2;
 
 	instance->InitializeFromVertices(vertices, indices);
 
@@ -828,7 +871,7 @@ void ModelCommon2::InitializeGraphicsPipeline() {
 	descRangeSRV.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0); // t0 レジスタ
 
 	// ルートパラメータ
-	CD3DX12_ROOT_PARAMETER rootparams[6];
+	CD3DX12_ROOT_PARAMETER rootparams[6]{};
 	rootparams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
 	rootparams[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
 	rootparams[2].InitAsConstantBufferView(2, 0, D3D12_SHADER_VISIBILITY_ALL);
