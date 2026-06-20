@@ -37,40 +37,18 @@ void GameScene::Initialize() {
 
 	model2_ = Effect::CreateSquare();
 
-	// worldTransform_.rotation_.x = std::numbers::pi_v<float> / 2.0f;
-	// worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
-	// worldTransform_.rotation_.z = std::numbers::pi_v<float> / 4.0f;
+	for (int g = 0; g < 5; g++) {
 
-	// worldTransform_.scale_ = {1.0f, 1.0f, 1.0f};
+		// 爆発の中心
+		Vector3 pos = {
 
-	// for (int i = 0; i < 15; i++) {
+		    (float)(rand() % 200 - 100) / 10.0f, (float)(rand() % 200 - 100) / 10.0f, 0.0f};
 
-	//	effects_.emplace_back();
+		// 1セット15本
+		for (int i = 0; i < 15; i++) {
 
-	//	EffectData& effect = effects_.back();
-
-	//	effect.worldTransform = new WorldTransform();
-
-	//	effect.worldTransform->Initialize();
-
-	//	float angle = (float)(rand() % 360) * (std::numbers::pi_v<float> / 180.0f);
-
-	//	effect.worldTransform->rotation_.z = angle;
-
-	//	float length = (rand() % 100) / 20.0f + 2.0f;
-
-	//	effect.worldTransform->scale_ = {0.05f, length, 1.0f};
-
-	//	float speed = (rand() % 100) / 500.0f + 0.02f;
-
-	//	effect.velocity = {cosf(angle) * speed, sinf(angle) * speed, 0.0f};
-
-	//	effect.lifeTime = 20 + rand() % 20;
-	//}
-
-	for (int i = 0; i < 15; i++) {
-
-		CreateEffect();
+			CreateEffect(pos);
+		}
 	}
 
 	// カメラ初期化
@@ -96,7 +74,9 @@ void GameScene::UpDate() {
 		// e.worldTransform->translation_.y += e.velocity.y;
 
 		// 拡大
-		e.worldTransform->scale_.x += e.scaleSpeed;
+		// e.worldTransform->scale_.x += e.scaleSpeed;
+
+		e.worldTransform->rotation_.z += 0.1f;
 
 		// フェードアウト
 		e.alpha = 1.0f - (float(e.currentTime) / float(e.lifeTime));
@@ -126,14 +106,24 @@ void GameScene::UpDate() {
 	// 全部消えたら一気に再生成
 	if (effects_.empty()) {
 
-		for (int i = 0; i < 15; i++) {
+		// 爆発を5セット生成
+		for (int g = 0; g < 5; g++) {
 
-			CreateEffect();
+			// 爆発中心
+			Vector3 position = {
+
+			    (float)(rand() % 200 - 100) / 10.0f, (float)(rand() % 200 - 100) / 10.0f, 0.0f};
+
+			// 1セット15本
+			for (int i = 0; i < 15; i++) {
+
+				CreateEffect(position);
+			}
 		}
 	}
 }
 
-void GameScene::CreateEffect() {
+void GameScene::CreateEffect(Vector3 position) {
 
 	effects_.emplace_back();
 
@@ -154,7 +144,7 @@ void GameScene::CreateEffect() {
 	effect.worldTransform->scale_ = {0.01f, length, 1.0f};
 
 	// 初期位置
-	effect.worldTransform->translation_ = {0.0f, 0.0f, 0.0f};
+	effect.worldTransform->translation_ = position;
 
 	// 速度
 	float speed = (rand() % 100) / 500.0f + 0.02f;
@@ -170,6 +160,10 @@ void GameScene::CreateEffect() {
 	effect.currentTime = 0;
 
 	effect.alpha = 1.0f;
+
+	effect.colorData.Initialize();
+
+	effect.colorData.SetColor({(float)(rand() % 256) / 255.0f, (float)(rand() % 256) / 255.0f, (float)(rand() % 256) / 255.0f, 1.0f});
 }
 
 void GameScene::Draw() {
@@ -179,7 +173,7 @@ void GameScene::Draw() {
 
 	for (auto& effect : effects_) {
 
-		model2_->Draw(*effect.worldTransform, camera_);
+		model2_->Draw(*effect.worldTransform, camera_, &effect.colorData);
 	}
 
 	Effect::PostDraw();

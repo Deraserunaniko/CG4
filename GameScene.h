@@ -17,7 +17,7 @@ public:
 
 	void Draw();
 
-	void CreateEffect();
+	void CreateEffect(Vector3 position);
 
 private:
 	uint32_t textureHandle_ = 0;
@@ -39,6 +39,10 @@ private:
 		int lifeTime = 30;
 
 		int currentTime = 0;
+
+		Vector4 color = {1, 1, 1, 1}; // ←追加
+
+		ObjectColor colorData;
 	};
 
 	std::vector<EffectData> effects_;
