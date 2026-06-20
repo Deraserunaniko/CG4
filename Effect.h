@@ -93,6 +93,19 @@ public: // 列挙子
 		kObjectColor,    // オブジェクトアルファ
 	};
 
+	/// <summary>
+	/// ヒット演出エフェクト
+	/// </summary>
+	enum class State {
+		kSpread, // 拡大中
+		kFade,   // フェードアウト中
+		kDead    // 死亡
+	};
+
+	static Effect* Create(const KamataEngine::Vector3& position);
+
+	bool IsDead() const { return state_ == State::kDead; }
+
 private:
 	static const char* kBaseDirectory;
 	static const char* kDefaultModelName;
@@ -145,6 +158,13 @@ public: // 静的メンバ関数
 
 public: // メンバ関数
 	~Effect() = default;
+
+	/// <summary>
+	/// 更新
+	/// </summary>
+	/// <param name="worldTransform"></param>
+	void Update(WorldTransform& worldTransform);
+
 	/// <summary>
 	/// 描画（テクスチャ差し替え）
 	/// </summary>
@@ -179,6 +199,16 @@ private:
 	// デフォルトマテリアル
 	std::unique_ptr<Material> defaultMaterial_ = nullptr;
 	const LightGroup* lightGroup_ = nullptr;
+
+	State state_ = State::kSpread;
+	// カウンター
+	uint32_t counter_ = 0;
+
+	// 拡大アニメーションの時間
+	static inline const uint32_t kSpreadTime = 10;
+
+	// フェードアウトアニメーションの時間
+	static inline const uint32_t kFadeTime = 20;
 
 private: // メンバ関数
 	/// <summary>
