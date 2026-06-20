@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <numbers>
+#include <cassert>
 
 GameScene::~GameScene() {
 	delete model_;
@@ -161,9 +162,9 @@ void GameScene::CreateEffect(Vector3 position) {
 
 	effect.alpha = 1.0f;
 
-	effect.colorData.Initialize();
+	//effect.colorData.Initialize();
 
-	effect.colorData.SetColor({(float)(rand() % 256) / 255.0f, (float)(rand() % 256) / 255.0f, (float)(rand() % 256) / 255.0f, 1.0f});
+	//effect.colorData.SetColor({(float)(rand() % 256) / 255.0f, (float)(rand() % 256) / 255.0f, (float)(rand() % 256) / 255.0f, 1.0f});
 }
 
 void GameScene::Draw() {
@@ -173,7 +174,7 @@ void GameScene::Draw() {
 
 	for (auto& effect : effects_) {
 
-		model2_->Draw(*effect.worldTransform, camera_, &effect.colorData);
+		model2_->Draw(*effect.worldTransform, camera_);
 	}
 
 	Effect::PostDraw();
