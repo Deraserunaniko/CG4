@@ -42,7 +42,7 @@ private:
 
 		Vector4 color = {1, 1, 1, 1}; // ←追加
 
-		//ObjectColor colorData;
+		ObjectColor colorData;
 	};
 
 	std::vector<EffectData> effects_;
