@@ -11,8 +11,14 @@ GameScene::~GameScene() {
 	delete model2_;
 	model2_ = nullptr;
 
+	delete particle_;
+	particle_ = nullptr;
+
 	Model2::StaticFinalize();
 	Effect::StaticFinalize();
+
+	//3Dモデルデータの解放
+	delete modelParticle_;
 
 	for (auto& e : effects_) {
 
@@ -37,6 +43,8 @@ void GameScene::Initialize() {
 	model_ = Model2::CreateSquare();
 
 	model2_ = Effect::CreateSquare();
+	// 3Dモデルデータの生成
+	modelParticle_ = Model::CreateSphere(4, 4);
 
 	for (int g = 0; g < 5; g++) {
 
@@ -55,6 +63,10 @@ void GameScene::Initialize() {
 	// カメラ初期化
 	camera_.Initialize();
 	camera_.translation_ = {0, 0, -10.0f};
+	//パーティクルの生成
+	particle_ = new Particle();
+	// パーティクルの初期化
+	particle_->Initialize();
 
 	upData_ = new UpData();
 	assert(upData_);
@@ -87,6 +99,7 @@ void GameScene::UpDate() {
 
 		// 更新
 		upData_->WorldTransformUpData(*e.worldTransform);
+		particle_->Update(e.worldTransform->translation_);
 
 		e.worldTransform->TransferMatrix();
 
