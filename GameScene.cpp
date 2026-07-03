@@ -1,8 +1,8 @@
 #include "GameScene.h"
+#include <cassert>
 #include <cstdlib>
 #include <ctime>
 #include <numbers>
-#include <cassert>
 
 GameScene::~GameScene() {
 	delete model_;
@@ -174,7 +174,7 @@ void GameScene::Draw() {
 
 	for (auto& effect : effects_) {
 
-		model2_->Draw(*effect.worldTransform, camera_);
+		model2_->Draw(*effect.worldTransform, camera_, &effect.colorData);
 	}
 
 	Effect::PostDraw();
