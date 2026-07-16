@@ -11,8 +11,6 @@ GameScene::~GameScene() {
 	delete model2_;
 	model2_ = nullptr;
 
-	delete particle_;
-	particle_ = nullptr;
 
 	Model2::StaticFinalize();
 	Effect::StaticFinalize();
@@ -66,7 +64,7 @@ void GameScene::Initialize() {
 	//パーティクルの生成
 	particle_ = new Particle();
 	// パーティクルの初期化
-	particle_->Initialize();
+	particle_->Initialize(modelParticle_);
 
 	upData_ = new UpData();
 	assert(upData_);
@@ -99,7 +97,8 @@ void GameScene::UpDate() {
 
 		// 更新
 		upData_->WorldTransformUpData(*e.worldTransform);
-		particle_->Update(e.worldTransform->translation_);
+		// パーティクルの更新
+		particle_->Update();
 
 		e.worldTransform->TransferMatrix();
 
@@ -181,14 +180,21 @@ void GameScene::CreateEffect(Vector3 position) {
 }
 
 void GameScene::Draw() {
-	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList();
+	Model::PreDraw();
+	// パーティクルの描画
+	particle_->Draw(camera_);
+	
+	Model::PostDraw();
+	
+
+	/*ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList();
 
 	Effect::PreDraw(commandList);
 
 	for (auto& effect : effects_) {
 
 		model2_->Draw(*effect.worldTransform, camera_, &effect.colorData);
-	}
+	}*/
 
-	Effect::PostDraw();
+	/*Effect::PostDraw();*/
 }
