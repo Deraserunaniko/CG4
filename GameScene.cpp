@@ -14,6 +14,10 @@ std::mt19937 randomEngine(seedGenerator());
 std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 
 GameScene::~GameScene() {
+
+	delete stage_;
+	stage_ = nullptr;
+
 	delete model_;
 	model_ = nullptr;
 
@@ -55,8 +59,7 @@ void GameScene::Initialize() {
 
 	model2_ = Effect::CreateSquare();
 
-	for (int g = 0; g < 5; g++) 
-	{
+	for (int g = 0; g < 5; g++) {
 
 		// 爆発の中心
 		Vector3 pos = {
@@ -83,16 +86,87 @@ void GameScene::Initialize() {
 	camera_.Initialize();
 	camera_.translation_ = {0, 0, -20.0f};
 
-	WorldTransform* worldTransform_ = new WorldTransform();
-	worldTransform_->Initialize();
-
 	upData_ = new UpData();
 	assert(upData_);
+
+	stage_ = new stage();
+	stage_->Initialize();
+
+	player_ = new Player();
+
+	modelPlayer_ = Model::CreateFromOBJ("player", true);
+
+	player_->Initialize(modelPlayer_, &camera_, {0.0f, 0.0f, 0.0f});
+
+	// バーゲージ
+	textureHandleGreenBar_ = TextureManager::Load("./Resources/bar/greenBar.png");
+	textureHandleRedBar_ = TextureManager::Load("./Resources/bar/redBar.png");
+
+	Vector2 barPos = {100.0f, 20.0f};
+
+	redBar_ = Sprite::Create(textureHandleRedBar_, barPos);
+	greenBar_ = Sprite::Create(textureHandleGreenBar_, barPos);
+
+	// 初期サイズ
+	redBar_->SetSize({320.0f, 40.0f});
+	greenBar_->SetSize({320.0f, 40.0f});
+
+	redBar_->SetColor({1.0f, 1.0f, 1.0f, 0.8f});
+	greenBar_->SetColor({1.0f, 1.0f, 1.0f, 0.8f});
+
+	// 数字画像
+	textureHandleNumber_ = TextureManager::Load("./Resources/number/number.png");
+
+	// 開始位置
+	Vector2 startPos = {900.0f, 20.0f};
+
+	// 5桁生成
+	for (int i = 0; i < 5; i++) {
+
+		spriteNumber_[i] = Sprite::Create(textureHandleNumber_, {startPos.x + numberSize_.x * i, startPos.y});
+
+		// 1文字のサイズ
+		spriteNumber_[i]->SetSize({numberSize_});
+
+		// 最初は0
+		spriteNumber_[i]->SetTextureRect({0.0f, 0.0f}, numberSize_);
+	}
 }
 
 void GameScene::UpDate() {
 
+	score_++;
+
+	if (score_ > 99999) {
+		score_ = 0;
+	}
+
+	int digit = 10000;
+	int number = score_;
+
+	for (int i = 0; i < 5; i++) {
+
+		// 今の桁
+		int nowNumber = number / digit;
+
+		spriteNumber_[i]->SetTextureRect({numberSize_.x * nowNumber, 0.0f}, {numberSize_.x, numberSize_.y});
+
+		// 次の桁へ
+		number %= digit;
+		digit /= 10;
+	}
+
 	camera_.UpdateMatrix();
+
+	player_->Update();
+
+	greenBarWidth_ -= greenBarSpeed_;
+
+	if (greenBarWidth_ <= 0.0f) {
+		greenBarWidth_ = maxGreenBarWidth_;
+	}
+
+	greenBar_->SetSize({greenBarWidth_, 40.0f});
 
 	// particle_->UpDate();
 
@@ -101,13 +175,6 @@ void GameScene::UpDate() {
 		auto& e = effects_[i];
 
 		e.currentTime++;
-
-		// 移動
-		// e.worldTransform->translation_.x += e.velocity.x;
-		// e.worldTransform->translation_.y += e.velocity.y;
-
-		// 拡大
-		// e.worldTransform->scale_.x += e.scaleSpeed;
 
 		e.worldTransform->rotation_.z += 0.1f;
 
@@ -173,6 +240,8 @@ void GameScene::UpDate() {
 		}
 		return false;
 	});
+
+	stage_->Update();
 }
 
 void GameScene::CreateEffect(Vector3 position) {
@@ -240,11 +309,28 @@ void GameScene::ParticleBorn(Vector3 position) {
 
 void GameScene::Draw() {
 
+	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
+
+	Sprite::PreDraw();
+	stage_->Draw();
+
+	redBar_->Draw();
+	greenBar_->Draw();
+
+	for (int i = 0; i < 5; i++) {
+		spriteNumber_[i]->Draw();
+	}
+	Sprite::PreDraw();
+
+	dxCommon->ClearDepthBuffer();
+
 	Model::PreDraw();
 
 	for (Particle* particle : particles_) {
 		particle->Draw(camera_);
 	}
+
+	player_->Draw();
 
 	Model::PostDraw();
 }
