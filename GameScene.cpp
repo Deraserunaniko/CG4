@@ -55,7 +55,8 @@ void GameScene::Initialize() {
 
 	model2_ = Effect::CreateSquare();
 
-	for (int g = 0; g < 5; g++) {
+	for (int g = 0; g < 5; g++) 
+	{
 
 		// 爆発の中心
 		Vector3 pos = {
