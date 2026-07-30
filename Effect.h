@@ -1,14 +1,16 @@
 #pragma once
-#include <3d\LightGroup.h>
-#include <3d\Material.h>
-#include <3d\Mesh.h>
-#include <3d\ObjectColor.h>
+// #include <3d\LightGroup.h>
+// #include <3d\Material.h>
+// #include <3d\Mesh.h>
+// #include <3d\ObjectColor.h>
+// #include <3d/WorldTransform.h>
+#include <KamataEngine.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <3d\Camera.h>
-#include <3d\WorldTransform.h>
+
 using namespace KamataEngine;
+
 //{
 
 class EffectCommon {

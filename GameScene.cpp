@@ -2,7 +2,16 @@
 #include <cassert>
 #include <cstdlib>
 #include <ctime>
+#include <math/MathUtility.h>
 #include <numbers>
+#include <random>
+
+using namespace MathUtility;
+using namespace KamataEngine;
+
+std::random_device seedGenerator;
+std::mt19937 randomEngine(seedGenerator());
+std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 
 GameScene::~GameScene() {
 	delete model_;
@@ -11,12 +20,11 @@ GameScene::~GameScene() {
 	delete model2_;
 	model2_ = nullptr;
 
+	// 3Dモデルデータの解放
+	delete modelParticle_;
 
 	Model2::StaticFinalize();
 	Effect::StaticFinalize();
-
-	//3Dモデルデータの解放
-	delete modelParticle_;
 
 	for (auto& e : effects_) {
 
@@ -25,6 +33,11 @@ GameScene::~GameScene() {
 	}
 
 	effects_.clear();
+
+	for (Particle* particle : particles_) {
+		delete particle;
+	}
+	particles_.clear();
 }
 
 void GameScene::Initialize() {
@@ -41,8 +54,6 @@ void GameScene::Initialize() {
 	model_ = Model2::CreateSquare();
 
 	model2_ = Effect::CreateSquare();
-	// 3Dモデルデータの生成
-	modelParticle_ = Model::CreateSphere(4, 4);
 
 	for (int g = 0; g < 5; g++) {
 
@@ -58,13 +69,21 @@ void GameScene::Initialize() {
 		}
 	}
 
+	// 3Dモデルデータの生成
+	modelParticle_ = Model::CreateSphere(4, 4);
+
+	// パーティクルの生成
+	particle_ = new Particle();
+
+	// 乱数の初期化
+	srand((unsigned int)time(nullptr));
+
 	// カメラ初期化
 	camera_.Initialize();
-	camera_.translation_ = {0, 0, -10.0f};
-	//パーティクルの生成
-	particle_ = new Particle();
-	// パーティクルの初期化
-	particle_->Initialize(modelParticle_);
+	camera_.translation_ = {0, 0, -20.0f};
+
+	WorldTransform* worldTransform_ = new WorldTransform();
+	worldTransform_->Initialize();
 
 	upData_ = new UpData();
 	assert(upData_);
@@ -73,6 +92,8 @@ void GameScene::Initialize() {
 void GameScene::UpDate() {
 
 	camera_.UpdateMatrix();
+
+	// particle_->UpDate();
 
 	for (size_t i = 0; i < effects_.size();) {
 
@@ -97,8 +118,6 @@ void GameScene::UpDate() {
 
 		// 更新
 		upData_->WorldTransformUpData(*e.worldTransform);
-		// パーティクルの更新
-		particle_->Update();
 
 		e.worldTransform->TransferMatrix();
 
@@ -134,6 +153,25 @@ void GameScene::UpDate() {
 			}
 		}
 	}
+
+	if (rand() % 20 == 0) {
+		Vector3 position = {distribution(randomEngine) * 20.0f, distribution(randomEngine) * 20.0f, 0.0f};
+
+		ParticleBorn(position);
+	}
+
+	// パーティクルの更新
+	for (Particle* particle : particles_) {
+		particle->UpDate();
+	}
+
+	particles_.remove_if([](Particle* particle) {
+		if (particle->IsFinished()) {
+			delete particle;
+			return true;
+		}
+		return false;
+	});
 }
 
 void GameScene::CreateEffect(Vector3 position) {
@@ -179,22 +217,33 @@ void GameScene::CreateEffect(Vector3 position) {
 	effect.colorData.SetColor({(float)(rand() % 256) / 255.0f, (float)(rand() % 256) / 255.0f, (float)(rand() % 256) / 255.0f, 1.0f});
 }
 
+// パーティクル発生
+void GameScene::ParticleBorn(Vector3 position) {
+
+	for (int i = 0; i < 50; i++) {
+
+		Particle* particle = new Particle();
+
+		Vector3 velocity = {distribution(randomEngine), distribution(randomEngine), 0.0f};
+
+		Normalize(velocity);
+
+		velocity *= distribution(randomEngine);
+		velocity *= 0.1f;
+
+		particle->Initialize(modelParticle_, position, velocity);
+
+		particles_.push_back(particle);
+	}
+}
+
 void GameScene::Draw() {
+
 	Model::PreDraw();
-	// パーティクルの描画
-	particle_->Draw(camera_);
-	
+
+	for (Particle* particle : particles_) {
+		particle->Draw(camera_);
+	}
+
 	Model::PostDraw();
-	
-
-	/*ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList();
-
-	Effect::PreDraw(commandList);
-
-	for (auto& effect : effects_) {
-
-		model2_->Draw(*effect.worldTransform, camera_, &effect.colorData);
-	}*/
-
-	/*Effect::PostDraw();*/
 }
